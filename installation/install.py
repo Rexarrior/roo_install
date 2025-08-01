@@ -57,7 +57,7 @@ def main():
     system_prompt_file = config_folder / '.ai_system_prompt'
     if system_prompt_file.exists():
         with open(system_prompt_file) as f:
-            system_prompt = f.read().strip()
+            system_prompt = f.read().strip().replace('"', "'").replace('\n', ' ')
     else:
         system_prompt = ""
         # Update both possible locations config
