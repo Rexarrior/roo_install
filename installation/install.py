@@ -59,7 +59,7 @@ def main():
         with open(system_prompt_file) as f:
             system_prompt = f.read().strip()
         # Update both possible locations config
-       base_config_t = base_config_t.replace("<SYSTEM_PROMPT>", system_prompt)
+        base_config_t = base_config_t.replace("<SYSTEM_PROMPT>", system_prompt)
 
     # Step 6: Write roo_settings.json (overwrite if exists in config folder)
     with open(target_folder / 'roo_settings.json', 'w') as f:
