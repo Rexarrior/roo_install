@@ -1,6 +1,6 @@
 {
     "providerProfiles": {
-        "currentApiConfigName": "opensource-qwen-code",
+        "currentApiConfigName": "qwen-coder",
         "apiConfigs": {
             "qwen-coder": {
                 "diffEnabled": true,

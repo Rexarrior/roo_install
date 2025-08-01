@@ -45,17 +45,13 @@ def main():
     
     # Step 2-3: Load configuration files
     with open('./config/base_config.json') as f:
-        base_config = json.load(f)
+        base_config_t =f.read()
     
     with open('./config/base_mcp_config.json') as f:
         base_mcp_config = json.load(f)
 
     # Step 4: Replace API key
-    if 'openrouter' in base_config and 'api_key' in base_config['openrouter']:
-        base_config['openrouter']['api_key'] = args.key
-    else:
-        # Fallback to root-level key
-        base_config['openrouter_api_key'] = args.key
+    base_config_t = base_config_t.replace("<OPENROUTER_API_KEY>", key)
 
     # Step 5: Replace system prompt
     system_prompt_file = config_folder / '.ai_system_prompt'
@@ -63,13 +59,11 @@ def main():
         with open(system_prompt_file) as f:
             system_prompt = f.read().strip()
         # Update both possible locations config
-        base_config['system_prompt'] = system_prompt
-        if 'context' in base_config:
-            base_config['context'] = system_prompt
+       base_config_t = base_config_t.replace("<SYSTEM_PROMPT>", system_prompt)
 
     # Step 6: Write roo_settings.json (overwrite if exists in config folder)
     with open(target_folder / 'roo_settings.json', 'w') as f:
-        json.dump(base_config, f, indent=2)
+        f.write(base_config_t)
 
     # Step 7: Write global MCP config
     mcp_path = Path.home() / '.config' / 'Code' / 'User' / 'globalStorage' / 'rooveterinaryinc.roo-cline' / 'settings'
