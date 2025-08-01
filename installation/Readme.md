@@ -1,10 +1,15 @@
 
 **Usage**:
 ```bash
-python3 setup_roo.py \
-  --key YOUR_OPENROUTER_API_KEY \
-  --target_folder ./my_project \
-  --config_folder ./custom_config
+python3 install.py \
+  --key key \
+  --target_folder ~/userver \
+  --config_folder ../userver
+
+python3 install.py \
+  --key key \
+  --target_folder ~/services \
+  --config_folder ../services
 ```
 
 **Notes**:
