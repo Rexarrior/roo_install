@@ -51,7 +51,7 @@ def main():
         base_mcp_config = json.load(f)
 
     # Step 4: Replace API key
-    base_config_t = base_config_t.replace("<OPENROUTER_API_KEY>", key)
+    base_config_t = base_config_t.replace("<OPENROUTER_API_KEY>", args.key)
 
     # Step 5: Replace system prompt
     system_prompt_file = config_folder / '.ai_system_prompt'
