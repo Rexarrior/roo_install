@@ -34,6 +34,15 @@ def main():
     target_folder = Path(args.target_folder)
     target_folder.mkdir(parents=True, exist_ok=True)
 
+    # Step 1: Copy entire config folder contents to target folder
+    print(f"Copying all contents from {config_folder} to {target_folder}...")
+    for item in config_folder.iterdir():
+        dest = target_folder / item.name
+        if item.is_dir():
+            shutil.copytree(item, dest, dirs_exist_ok=True)
+        else:
+            shutil.copy2(item, dest)
+    
     # Step 2-3: Load configuration files
     with open('./config/base_config.json') as f:
         base_config = json.load(f)
@@ -53,32 +62,22 @@ def main():
     if system_prompt_file.exists():
         with open(system_prompt_file) as f:
             system_prompt = f.read().strip()
-        # Update both possible locations in config
+        # Update both possible locations config
         base_config['system_prompt'] = system_prompt
         if 'context' in base_config:
             base_config['context'] = system_prompt
 
-    # Step 6: Copy AI memory bank
-    memory_bank = config_folder / 'ai_memory_bank'
-    if memory_bank.exists():
-        shutil.copytree(memory_bank, target_folder / 'ai_memory_bank', dirs_exist_ok=True)
-
-    # Step 7: Copy .roorules
-    roorules = config_folder / '.roorules'
-    if roorules.exists():
-        shutil.copy2(roorules, target_folder)
-
-    # Step 8: Write roo_settings.json
+    # Step 6: Write roo_settings.json (overwrite if exists in config folder)
     with open(target_folder / 'roo_settings.json', 'w') as f:
         json.dump(base_config, f, indent=2)
 
-    # Step 9: Write global MCP config
+    # Step 7: Write global MCP config
     mcp_path = Path.home() / '.config' / 'Code' / 'User' / 'globalStorage' / 'rooveterinaryinc.roo-cline' / 'settings'
     mcp_path.mkdir(parents=True, exist_ok=True)
     with open(mcp_path / 'mcp_settings.json', 'w') as f:
         json.dump(base_mcp_config, f, indent=2)
 
-    # Step 10: Install VS Code
+    # Step 8: Install VS Code
     deb_url = "https://go.microsoft.com/fwlink/?LinkID=760868"
     deb_path = "/tmp/vscode.deb"
     
@@ -92,30 +91,13 @@ def main():
     else:
         print("VS Code already installed")
 
-    # Step 11: Install Roo extension
+    # Step 9: Install Roo extension
     print("Installing Roo extension...")
     run_command(["code", "--install-extension", "rooveterinaryinc.roo-cline"])
 
-    # New Step: Install Node.js and npm
+    # Step 10: Install Node.js and npm
     print("Checking Node.js and npm installation...")
     if not shutil.which("node") or not shutil.which("npm"):
         print("Installing Node.js and npm...")
         run_command(["sudo", "apt", "update"])
-        run_command(["sudo", "apt", "install", "-y", "nodejs", "npm"])
-        print("Node.js and npm installed successfully")
-    else:
-        print("Node.js and npm already installed")
-
-    # New Step: Install MCP Playwright globally
-    print("Installing MCP Playwright...")
-    run_command(["sudo", "npm", "install", "-g", "mcp-playwright@latest"])
-    print("MCP Playwright installed globally")
-
-    # Final validation
-    print("\nSetup completed successfully!")
-    print(f"Configuration files created in: {target_folder}")
-    print(f"VS Code extension installed: rooveterinaryinc.roo-cline")
-    print("Global packages installed: nodejs, npm, mcp-playwright")
-
-if __name__ == "__main__":
-    main()
+        run_command
