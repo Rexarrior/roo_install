@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+   
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--headless"
+      ],
+      "disabled": false,
+      "alwaysAllow": [
+        "browser_navigate",
+        "browser_click",
+        "browser_navigate_back",
+        "browser_handle_dialog",
+        "browser_type",
+        "browser_console_messages",
+        "browser_network_requests",
+        "browser_resize",
+        "browser_take_screenshot",
+        "browser_snapshot",
+        "browser_wait_for",
+        "browser_evaluate",
+        "browser_select_option",
+        "browser_install",
+        "browser_close",
+        "browser_file_upload"
+      ]
+    }
+  }
+}
