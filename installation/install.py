@@ -100,4 +100,22 @@ def main():
     if not shutil.which("node") or not shutil.which("npm"):
         print("Installing Node.js and npm...")
         run_command(["sudo", "apt", "update"])
-        run_command
+        run_command(["sudo", "apt", "install", "-y", "nodejs", "npm"])
+        print("Node.js and npm installed successfully")
+    else:
+        print("Node.js and npm already installed")
+
+    # Step 11: Install MCP Playwright globally
+    print("Installing MCP Playwright...")
+    run_command(["sudo", "npm", "install", "-g", "mcp-playwright@latest"])
+    print("MCP Playwright installed globally")
+
+    # Final validation
+    print("\nSetup completed successfully!")
+    print(f"Configuration files created in: {target_folder}")
+    print(f"VS Code extension installed: rooveterinaryinc.roo-cline")
+    print("Global packages installed: nodejs, npm, mcp-playwright")
+    print(f"All content from {config_folder} copied to {target_folder}")
+
+if __name__ == "__main__":
+    main()
