@@ -452,7 +452,7 @@ public:
 class GrpcConnectionPool {
 public:
     std::shared_ptr<GrpcClient> GetClient(const std::string& endpoint) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         auto& pool = pools_[endpoint];
         if (pool.empty()) {
@@ -465,12 +465,12 @@ public:
     }
     
     void ReturnClient(const std::string& endpoint, std::shared_ptr<GrpcClient> client) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         pools_[endpoint].push_back(std::move(client));
     }
     
 private:
-    std::mutex mutex_;
+    engine::Mutex mutex_;
     std::unordered_map<std::string, std::vector<std::shared_ptr<GrpcClient>>> pools_;
 };
 ```

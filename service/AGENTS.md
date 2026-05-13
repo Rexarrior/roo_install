@@ -33,7 +33,7 @@ All error responses MUST follow consistent JSON format with "code" and "message"
 HTTP handlers MUST validate all incoming request data (headers, body, path parameters) before processing.
 
 # Thread safety for in-memory storage
-When using in-memory data structures across multiple coroutines, you MUST protect them with `std::mutex` or use thread-safe containers.
+When using in-memory data structures across multiple coroutines, you MUST protect them with `engine::Mutex` or use thread-safe containers.
 
 # Logging level
 Use appropriate logging levels: `LOG_DEBUG()` for debugging, `LOG_INFO()` for normal operations, `LOG_ERROR()` for errors.

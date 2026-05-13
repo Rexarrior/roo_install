@@ -347,7 +347,7 @@ private:
     size_t max_size_;
     std::list<std::pair<Key, Value>> items_list_;
     std::unordered_map<Key, typename std::list<std::pair<Key, Value>>::iterator> items_map_;
-    mutable std::shared_mutex mutex_;
+    mutable engine::SharedMutex mutex_;
 };
 
 // Time-based expiration cache
@@ -420,7 +420,7 @@ private:
     
     std::chrono::seconds default_ttl_;
     std::unordered_map<Key, CacheEntry> cache_;
-    mutable std::mutex mutex_;
+    mutable engine::Mutex mutex_;
     size_t cleanup_threshold_{1000};
 };
 
@@ -863,10 +863,10 @@ private:
     std::chrono::seconds default_ttl_;
     std::chrono::seconds early_recompute_;
     std::unordered_map<Key, CacheEntry> cache_;
-    mutable std::shared_mutex mutex_;
+    mutable engine::SharedMutex mutex_;
     
     std::unordered_set<Key> background_tasks_;
-    std::mutex background_mutex_;
+    engine::Mutex background_mutex_;
 };
 
 } // namespace your_service::cache

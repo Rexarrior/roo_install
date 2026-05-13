@@ -40,7 +40,7 @@ struct UserInfo {
 class AuthMiddleware {
 public:
     static std::optional<UserInfo> ValidateToken(const std::string& token) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         auto it = tokens_.find(token);
         if (it == tokens_.end()) {
@@ -57,7 +57,7 @@ public:
     }
     
     static std::string GenerateToken(const UserInfo& user_info) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         // Generate random token (in production, use secure random)
         std::string token = GenerateSecureToken();
@@ -72,12 +72,12 @@ public:
     }
     
     static void InvalidateToken(const std::string& token) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         tokens_.erase(token);
     }
     
     static void InvalidateAllUserTokens(const std::string& user_id) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         for (auto it = tokens_.begin(); it != tokens_.end(); ) {
             if (it->second.user_id == user_id) {
@@ -116,7 +116,7 @@ private:
     }
     
     static std::unordered_map<std::string, UserInfo> tokens_;
-    static std::mutex mutex_;
+    static engine::Mutex mutex_;
 };
 
 } // namespace your_service::auth
@@ -453,7 +453,7 @@ public:
     RateLimiter(const Config& config) : config_(config) {}
     
     bool AllowRequest(const std::string& user_id) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         auto& user_limits = user_limits_[user_id];
         auto now = std::chrono::steady_clock::now();
@@ -481,7 +481,7 @@ public:
     std::optional<std::chrono::seconds> GetRetryAfter(
         const std::string& user_id) {
         
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         auto it = user_limits_.find(user_id);
         if (it == user_limits_.end()) {
@@ -513,7 +513,7 @@ public:
     }
     
     void ResetUser(const std::string& user_id) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         user_limits_.erase(user_id);
     }
 
@@ -538,7 +538,7 @@ private:
     
     Config config_;
     std::unordered_map<std::string, UserLimits> user_limits_;
-    std::mutex mutex_;
+    engine::Mutex mutex_;
 };
 
 } // namespace your_service::auth
@@ -611,7 +611,7 @@ struct ApiKeyInfo {
 class ApiKeyAuth {
 public:
     std::optional<ApiKeyInfo> ValidateApiKey(const std::string& api_key) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         auto it = api_keys_.find(api_key);
         if (it == api_keys_.end()) {
@@ -645,7 +645,7 @@ public:
                               const std::vector<std::string>& permissions,
                               std::chrono::hours validity_hours = std::chrono::hours(24 * 30)) { // 30 days default
         
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         // Generate secure API key
         std::string api_key = GenerateSecureKey();
@@ -669,7 +669,7 @@ public:
     }
     
     void RevokeApiKey(const std::string& key_id) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         auto it = key_id_to_api_key_.find(key_id);
         if (it != key_id_to_api_key_.end()) {
@@ -682,7 +682,7 @@ public:
     }
     
     std::vector<ApiKeyInfo> ListApiKeys() const {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         
         std::vector<ApiKeyInfo> keys;
         keys.reserve(api_keys_.size());
@@ -724,7 +724,7 @@ private:
     
     std::unordered_map<std::string, ApiKeyInfo> api_keys_;
     std::unordered_map<std::string, std::string> key_id_to_api_key_;
-    mutable std::mutex mutex_;
+    mutable engine::Mutex mutex_;
 };
 
 } // namespace your_service::auth

@@ -459,7 +459,7 @@ public:
     }
     
     void LoadConfig() {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<engine::Mutex> lock(mutex_);
         // Parse and validate config file
         // Update internal state
     }
@@ -483,7 +483,7 @@ private:
     }
     
     std::string config_path_;
-    std::mutex mutex_;
+    engine::Mutex mutex_;
     std::thread watcher_thread_;
     std::atomic<bool> stop_watcher_{false};
     std::filesystem::file_time_type last_loaded_;
