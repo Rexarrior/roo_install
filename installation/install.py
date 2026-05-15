@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 
@@ -86,6 +87,34 @@ def apt_install(packages: list[str]) -> None:
     run_command(sudo_prefix() + ["apt-get", "install", "-y", *packages])
 
 
+@contextmanager
+def prevent_service_autostart_during_apt():
+    """Prevent package post-install scripts from auto-starting daemons.
+
+    Some workshop hosts already have ports 80/443 occupied by existing services.
+    Installing nginx must still succeed in that case, so we temporarily add the
+    standard Debian/Ubuntu policy hook that tells invoke-rc.d not to start
+    services automatically. Services required by this installer are started
+    explicitly later.
+    """
+    policy_path = Path("/usr/sbin/policy-rc.d")
+    created_policy = False
+
+    if not policy_path.exists():
+        run_shell(
+            "printf '%s\n' '#!/bin/sh' 'exit 101' "
+            "| sudo tee /usr/sbin/policy-rc.d > /dev/null"
+        )
+        run_command(sudo_prefix() + ["chmod", "755", "/usr/sbin/policy-rc.d"])
+        created_policy = True
+
+    try:
+        yield
+    finally:
+        if created_policy:
+            run_command(sudo_prefix() + ["rm", "-f", "/usr/sbin/policy-rc.d"])
+
+
 def parse_os_release() -> dict[str, str]:
     data: dict[str, str] = {}
     path = Path("/etc/os-release")
@@ -115,45 +144,47 @@ def ensure_ubuntu_24() -> None:
 def install_base_packages() -> None:
     print("Installing base tools and C++/userver build dependencies...")
     run_command(sudo_prefix() + ["apt-get", "update"])
-    apt_install(
-        [
-            "apt-transport-https",
-            "bash",
-            "build-essential",
-            "ca-certificates",
-            "clang",
-            "cmake",
-            "curl",
-            "g++",
-            "gcc",
-            "git",
-            "gnupg",
-            "libboost-all-dev",
-            "libcrypto++-dev",
-            "libcurl4-openssl-dev",
-            "libev-dev",
-            "libfmt-dev",
-            "libhttp-parser-dev",
-            "libicu-dev",
-            "libnghttp2-dev",
-            "libpcre2-dev",
-            "libpq-dev",
-            "libssl-dev",
-            "libyaml-cpp-dev",
-            "libzstd-dev",
-            "lsb-release",
-            "make",
-            "ninja-build",
-            "pkg-config",
-            "postgresql",
-            "postgresql-contrib",
-            "python3",
-            "python3-pip",
-            "python3-venv",
-            "unzip",
-            "wget",
-        ]
-    )
+    with prevent_service_autostart_during_apt():
+        apt_install(
+            [
+                "apt-transport-https",
+                "bash",
+                "build-essential",
+                "ca-certificates",
+                "clang",
+                "cmake",
+                "curl",
+                "g++",
+                "gcc",
+                "git",
+                "gnupg",
+                "libboost-all-dev",
+                "libcrypto++-dev",
+                "libcurl4-openssl-dev",
+                "libev-dev",
+                "libfmt-dev",
+                "libhttp-parser-dev",
+                "libicu-dev",
+                "libnghttp2-dev",
+                "libpcre2-dev",
+                "libpq-dev",
+                "libssl-dev",
+                "libyaml-cpp-dev",
+                "libzstd-dev",
+                "lsb-release",
+                "make",
+                "nginx",
+                "ninja-build",
+                "pkg-config",
+                "postgresql",
+                "postgresql-contrib",
+                "python3",
+                "python3-pip",
+                "python3-venv",
+                "unzip",
+                "wget",
+            ]
+        )
 
 
 def install_nodejs_latest() -> None:

@@ -93,10 +93,11 @@ src code install
 - Python 3, venv/pip;
 - Git, curl, wget, unzip;
 - PostgreSQL server и contrib;
+- Nginx для локального reverse proxy/static serving;
 - Docker Engine, Docker Compose plugin, Buildx из официального Docker repository;
 - Node.js последней доступной версии из NodeSource `setup_current.x`.
 
-После установки PostgreSQL включается и запускается через `systemctl enable --now postgresql`.
+Во время `apt`-установки скрипт временно запрещает автозапуск сервисов через `policy-rc.d`, чтобы установка `nginx` не падала на машинах, где порты `80`/`443` уже заняты. После установки PostgreSQL включается и запускается явно через `systemctl enable --now postgresql`.
 
 ## Проверка репозитория
 
