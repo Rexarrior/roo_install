@@ -265,6 +265,21 @@ def install_vscode_if_missing() -> None:
     require_command("code")
 
 
+def find_sourcecraft_binary() -> str:
+    candidates = [
+        shutil.which("src"),
+        str(Path.home() / "sourcecraft" / "bin" / "src"),
+        str(Path.home() / ".local" / "bin" / "src"),
+    ]
+    for candidate in candidates:
+        if candidate and Path(candidate).exists():
+            return candidate
+    raise InstallerError(
+        "SourceCraft CLI was installed, but the `src` binary was not found. "
+        "Expected it in PATH or in ~/sourcecraft/bin/src."
+    )
+
+
 def install_sourcecraft() -> None:
     print("Installing SourceCraft Code Assistant VS Code extension and CLI...")
     install_vscode_if_missing()
@@ -274,7 +289,7 @@ def install_sourcecraft() -> None:
         run_command(["code", "--install-extension", str(vsix_path), "--force"])
 
     run_shell(f"curl -fsSL {SOURCECRAFT_CLI_INSTALL_URL} | sh")
-    src_binary = shutil.which("src") or str(Path.home() / ".local" / "bin" / "src")
+    src_binary = find_sourcecraft_binary()
     run_command([src_binary, "code", "install"])
 
 
