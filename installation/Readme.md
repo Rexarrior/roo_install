@@ -89,7 +89,7 @@ src code install
 - GCC/G++ с проверкой версии `>= 11.2`;
 - Clang с проверкой версии `>= 16`;
 - CMake, Make, Ninja, pkg-config;
-- OpenSSL, Boost и другие dev-библиотеки, нужные для userver;
+- OpenSSL, Boost, jemalloc и другие dev-библиотеки, нужные для userver;
 - Python 3, venv/pip;
 - Git, curl, wget, unzip;
 - PostgreSQL server и contrib;

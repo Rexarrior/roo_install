@@ -165,6 +165,7 @@ def install_base_packages() -> None:
                 "libfmt-dev",
                 "libhttp-parser-dev",
                 "libicu-dev",
+                "libjemalloc-dev",
                 "libnghttp2-dev",
                 "libpcre2-dev",
                 "libpq-dev",
