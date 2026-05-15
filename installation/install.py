@@ -152,6 +152,7 @@ def install_base_packages() -> None:
                 "build-essential",
                 "ca-certificates",
                 "clang",
+                "clang-format",
                 "cmake",
                 "curl",
                 "g++",

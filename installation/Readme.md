@@ -87,7 +87,7 @@ src code install
 Скрипт ставит через `apt` набор пакетов для сборки userver-сервисов и frontend:
 
 - GCC/G++ с проверкой версии `>= 11.2`;
-- Clang с проверкой версии `>= 16`;
+- Clang с проверкой версии `>= 16` и `clang-format` для генерации userver/chaotic;
 - CMake, Make, Ninja, pkg-config;
 - OpenSSL, Boost, jemalloc и другие dev-библиотеки, нужные для userver;
 - Python 3, venv/pip;
