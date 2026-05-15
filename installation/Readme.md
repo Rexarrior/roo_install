@@ -8,6 +8,7 @@
 - ставит системные зависимости для frontend/backend разработки;
 - ставит последнюю Node.js из NodeSource;
 - ставит Docker Engine, Docker Compose plugin и локальный PostgreSQL;
+- ставит prebuilt `libuserver-all-dev` пакет для Ubuntu 24.04;
 - клонирует `https://github.com/Malevrovich/cpprussia2026_template.git`;
 - проверяет сборку frontend и backend.
 
@@ -90,6 +91,7 @@ src code install
 - Clang с проверкой версии `>= 16` и `clang-format` для генерации userver/chaotic;
 - CMake, Make, Ninja, pkg-config;
 - OpenSSL, Boost, jemalloc и другие dev-библиотеки, нужные для userver;
+- prebuilt userver development package `ubuntu24.04-libuserver-all-dev_3.0_amd64.deb` из GitHub Releases;
 - Python 3, venv/pip;
 - Git, curl, wget, unzip;
 - PostgreSQL server и contrib;
@@ -97,7 +99,13 @@ src code install
 - Docker Engine, Docker Compose plugin, Buildx из официального Docker repository;
 - Node.js последней доступной версии из NodeSource `setup_current.x`.
 
-Во время `apt`-установки скрипт временно запрещает автозапуск сервисов через `policy-rc.d`, чтобы установка `nginx` не падала на машинах, где порты `80`/`443` уже заняты. После установки PostgreSQL включается и запускается явно через `systemctl enable --now postgresql`.
+Во время `apt`-установки скрипт временно запрещает автозапуск сервисов через `policy-rc.d`, чтобы установка `nginx` не падала на машинах, где порты `80`/`443` уже заняты. После базовых пакетов скачивается и устанавливается userver `.deb`:
+
+```text
+https://github.com/userver-framework/userver/releases/download/v3.0/ubuntu24.04-libuserver-all-dev_3.0_amd64.deb
+```
+
+После установки PostgreSQL включается и запускается явно через `systemctl enable --now postgresql`.
 
 ## Проверка репозитория
 

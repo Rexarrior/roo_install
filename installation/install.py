@@ -24,6 +24,10 @@ SOURCECRAFT_VSIX_URL = (
 )
 SOURCECRAFT_CLI_INSTALL_URL = "https://s3.yandexcloud.net/sourcecraft-cli/install.sh"
 NODE_SOURCE_SETUP_URL = "https://deb.nodesource.com/setup_current.x"
+USERVER_DEB_URL = (
+    "https://github.com/userver-framework/userver/releases/download/v3.0/"
+    "ubuntu24.04-libuserver-all-dev_3.0_amd64.deb"
+)
 TEMPLATE_REPO_URL = "https://github.com/Malevrovich/cpprussia2026_template.git"
 TEMPLATE_REPO_DIR_NAME = "cpprussia2026_template"
 UBUNTU_VERSION = "24.04"
@@ -187,6 +191,15 @@ def install_base_packages() -> None:
                 "wget",
             ]
         )
+
+
+def install_userver_deb() -> None:
+    print("Installing prebuilt userver development package for Ubuntu 24.04...")
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        deb_path = Path(tmp_dir) / "ubuntu24.04-libuserver-all-dev_3.0_amd64.deb"
+        run_command(["wget", USERVER_DEB_URL, "-O", str(deb_path)])
+        with prevent_service_autostart_during_apt():
+            run_command(sudo_prefix() + ["apt-get", "install", "-y", str(deb_path)])
 
 
 def install_nodejs_latest() -> None:
@@ -412,6 +425,7 @@ def main() -> int:
 
         if not args.skip_dependencies:
             install_base_packages()
+            install_userver_deb()
             install_nodejs_latest()
             install_docker()
             ensure_postgresql_running()
