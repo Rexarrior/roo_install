@@ -18,6 +18,11 @@ from contextlib import contextmanager
 from pathlib import Path
 
 
+def repo_name_from_url(repo_url: str) -> str:
+    """Derive a local repository directory name from a Git URL."""
+    return repo_url.rstrip("/").removesuffix(".git").rsplit("/", 1)[-1]
+
+
 SOURCECRAFT_VSIX_URL = (
     "https://storage.yandexcloud.net/yandex-code-assistant/plugins/vscode/"
     "yandex-code-assist.vsix"
@@ -29,7 +34,9 @@ USERVER_DEB_URL = (
     "ubuntu24.04-libuserver-all-dev_3.0_amd64.deb"
 )
 TEMPLATE_REPO_URL = "https://github.com/Malevrovich/cpprussia2026_template.git"
-TEMPLATE_REPO_DIR_NAME = "cpprussia2026_template"
+TEMPLATE_REPO_DIR_NAME = repo_name_from_url(TEMPLATE_REPO_URL)
+USERVER_REPO_URL = "https://github.com/userver-framework/userver.git"
+USERVER_REPO_DIR_NAME = repo_name_from_url(USERVER_REPO_URL)
 UBUNTU_VERSION = "24.04"
 
 
@@ -322,17 +329,25 @@ def copy_rules(config_folder: Path, target_folder: Path) -> None:
             shutil.copy2(item, destination)
 
 
-def clone_template(repo_dir: Path, *, update_existing: bool) -> None:
+def clone_repository(repo_url: str, repo_dir: Path, *, update_existing: bool, display_name: str) -> None:
     if repo_dir.exists():
         if update_existing:
-            print(f"Template repository already exists at {repo_dir}; updating it...")
+            print(f"{display_name} repository already exists at {repo_dir}; updating it...")
             run_command(["git", "pull", "--ff-only"], cwd=repo_dir)
         else:
-            print(f"Template repository already exists at {repo_dir}; keeping existing checkout")
+            print(f"{display_name} repository already exists at {repo_dir}; keeping existing checkout")
         return
 
     repo_dir.parent.mkdir(parents=True, exist_ok=True)
-    run_command(["git", "clone", TEMPLATE_REPO_URL, str(repo_dir)])
+    run_command(["git", "clone", repo_url, str(repo_dir)])
+
+
+def clone_template(repo_dir: Path, *, update_existing: bool) -> None:
+    clone_repository(TEMPLATE_REPO_URL, repo_dir, update_existing=update_existing, display_name="Template")
+
+
+def clone_userver(repo_dir: Path, *, update_existing: bool) -> None:
+    clone_repository(USERVER_REPO_URL, repo_dir, update_existing=update_existing, display_name="userver")
 
 
 def verify_frontend(repo_dir: Path) -> None:
@@ -361,7 +376,10 @@ def verify_backend(repo_dir: Path) -> None:
 def parse_args() -> argparse.Namespace:
     script_dir = Path(__file__).resolve().parent
     default_rules_folder = script_dir.parent / "service"
-    default_target_folder = Path.cwd() / "cpprussia2026_workspace"
+    default_home_folder = Path.home()
+    default_target_folder = default_home_folder / "cpprussia2026_workspace"
+    default_template_repo_dir = default_home_folder / TEMPLATE_REPO_DIR_NAME
+    default_userver_repo_dir = default_home_folder / USERVER_REPO_DIR_NAME
 
     parser = argparse.ArgumentParser(
         description="Install Ubuntu 24.04 dependencies, SourceCraft tools, rules, and C++ Russia template"
@@ -370,7 +388,7 @@ def parse_args() -> argparse.Namespace:
         "--target-folder",
         "--target_folder",
         default=str(default_target_folder),
-        help="Workspace folder where agent rules will be copied and the template repo will be cloned",
+        help="Workspace folder where agent rules will be copied",
     )
     parser.add_argument(
         "--config-folder",
@@ -380,8 +398,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--repo-dir",
-        default=None,
-        help="Destination for the cloned template repository; defaults to <target-folder>/cpprussia2026_template",
+        default=str(default_template_repo_dir),
+        help=f"Destination for the cloned template repository; defaults to {default_template_repo_dir}",
+    )
+    parser.add_argument(
+        "--userver-repo-dir",
+        default=str(default_userver_repo_dir),
+        help=f"Destination for the cloned userver repository; defaults to {default_userver_repo_dir}",
     )
     parser.add_argument(
         "--update-existing-repo",
@@ -401,7 +424,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--skip-clone",
         action="store_true",
-        help="Skip cloning/updating the template repository",
+        help="Skip cloning/updating the template and userver repositories",
     )
     parser.add_argument(
         "--skip-build-checks",
@@ -416,7 +439,8 @@ def main() -> int:
 
     target_folder = Path(args.target_folder).expanduser().resolve()
     config_folder = Path(args.config_folder).expanduser().resolve()
-    repo_dir = Path(args.repo_dir).expanduser().resolve() if args.repo_dir else target_folder / TEMPLATE_REPO_DIR_NAME
+    repo_dir = Path(args.repo_dir).expanduser().resolve()
+    userver_repo_dir = Path(args.userver_repo_dir).expanduser().resolve()
 
     try:
         ensure_ubuntu_24()
@@ -440,6 +464,7 @@ def main() -> int:
 
         if not args.skip_clone:
             clone_template(repo_dir, update_existing=args.update_existing_repo)
+            clone_userver(userver_repo_dir, update_existing=args.update_existing_repo)
         else:
             print("Skipping repository clone/update by request")
 
@@ -456,6 +481,7 @@ def main() -> int:
     print("\nInstallation completed successfully")
     print(f"Rules workspace: {target_folder}")
     print(f"Template repository: {repo_dir}")
+    print(f"userver repository: {userver_repo_dir}")
     print("Installed agent: SourceCraft Code Assistant")
     return 0
 

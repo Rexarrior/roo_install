@@ -9,8 +9,8 @@
 - ставит последнюю Node.js из NodeSource;
 - ставит Docker Engine, Docker Compose plugin и локальный PostgreSQL;
 - ставит prebuilt `libuserver-all-dev` пакет для Ubuntu 24.04;
-- клонирует `https://github.com/Malevrovich/cpprussia2026_template.git`;
-- проверяет сборку frontend и backend.
+- клонирует template repository и `userver` repository в домашнюю директорию пользователя;
+- проверяет сборку frontend и backend из template repository.
 
 ## Требования
 
@@ -30,10 +30,20 @@ python3 install.py \
   --target-folder /home/$USER/cpprussia2026_workspace
 ```
 
-По умолчанию скрипт копирует правила из `../service` и клонирует шаблон в:
+По умолчанию скрипт копирует правила из `../service`, а репозитории клонирует напрямую в домашнюю директорию:
 
 ```text
-/home/$USER/cpprussia2026_workspace/cpprussia2026_template
+/home/$USER/roo_install
+/home/$USER/cpprussia2026_template
+/home/$USER/userver
+```
+
+`roo_install` — это репозиторий, из которого запускается сам установщик. Его нужно заранее склонировать или обновить в домашней директории, например:
+
+```bash
+git clone https://github.com/Rexarrior/roo_install.git /home/$USER/roo_install
+cd /home/$USER/roo_install/installation
+python3 install.py
 ```
 
 ## Полный пример
@@ -42,7 +52,8 @@ python3 install.py \
 python3 install.py \
   --target-folder /home/$USER/cpprussia2026_workspace \
   --config-folder ../service \
-  --repo-dir /home/$USER/cpprussia2026_workspace/cpprussia2026_template
+  --repo-dir /home/$USER/cpprussia2026_template \
+  --userver-repo-dir /home/$USER/userver
 ```
 
 ## Параметры
@@ -51,7 +62,8 @@ python3 install.py \
 |---|---|
 | `--target-folder` / `--target_folder` | Рабочая директория, куда копируются `AGENTS.md`, `rules/` и `skills/`. |
 | `--config-folder` / `--config_folder` | Источник правил для агента. По умолчанию `../service`. |
-| `--repo-dir` | Путь, куда клонируется `cpprussia2026_template`. По умолчанию `<target-folder>/cpprussia2026_template`. |
+| `--repo-dir` | Путь, куда клонируется template repository. По умолчанию `/home/$USER/<имя из TEMPLATE_REPO_URL>`, сейчас `/home/$USER/cpprussia2026_template`. |
+| `--userver-repo-dir` | Путь, куда клонируется `userver`. По умолчанию `/home/$USER/userver`. |
 | `--update-existing-repo` | Если репозиторий уже существует, выполнить `git pull --ff-only`. Без этого существующий checkout не меняется. |
 | `--skip-sourcecraft` | Пропустить установку расширения и CLI SourceCraft. |
 | `--skip-dependencies` | Пропустить установку системных пакетов, Node.js, Docker и PostgreSQL. |
@@ -109,7 +121,7 @@ https://github.com/userver-framework/userver/releases/download/v3.0/ubuntu24.04-
 
 ## Проверка репозитория
 
-После клонирования `cpprussia2026_template` скрипт выполняет:
+Template repository задаётся одной переменной `TEMPLATE_REPO_URL` в `install.py`; имя директории по умолчанию вычисляется из этой переменной, без отдельного хардкода. После клонирования `cpprussia2026_template` скрипт выполняет:
 
 ### Frontend
 
