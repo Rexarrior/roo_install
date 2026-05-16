@@ -362,15 +362,32 @@ def verify_frontend(repo_dir: Path) -> None:
     run_command(["npm", "run", "build"], cwd=frontend_dir)
 
 
-def verify_backend(repo_dir: Path) -> None:
+def find_backend_build_dir(repo_dir: Path) -> Path:
     backend_dir = repo_dir / "backend"
     if not backend_dir.exists():
         raise InstallerError(f"Backend directory was not found: {backend_dir}")
 
-    print("Verifying backend build...")
-    run_command(["cmake", "-B", "build", "-S", "backend"], cwd=repo_dir)
+    if (backend_dir / "CMakeLists.txt").exists():
+        return backend_dir
+
+    preferred_service_dir = backend_dir / "auth_service"
+    if (preferred_service_dir / "CMakeLists.txt").exists():
+        return preferred_service_dir
+
+    service_dirs = sorted(path for path in backend_dir.glob("*_service") if (path / "CMakeLists.txt").exists())
+    if service_dirs:
+        return service_dirs[0]
+
+    raise InstallerError(f"No backend CMakeLists.txt was found under: {backend_dir}")
+
+
+def verify_backend(repo_dir: Path) -> None:
+    backend_build_dir = find_backend_build_dir(repo_dir)
+
+    print(f"Verifying backend build in {backend_build_dir}...")
+    run_command(["cmake", "-B", "build", "-S", "."], cwd=backend_build_dir)
     jobs = str(os.cpu_count() or 2)
-    run_command(["cmake", "--build", "build", f"-j{jobs}"], cwd=repo_dir)
+    run_command(["cmake", "--build", "build", f"-j{jobs}"], cwd=backend_build_dir)
 
 
 def parse_args() -> argparse.Namespace:

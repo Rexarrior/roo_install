@@ -135,10 +135,16 @@ npm run build
 
 ### Backend
 
-Из корня шаблонного репозитория:
+Скрипт поддерживает две раскладки backend:
+
+- если есть `backend/CMakeLists.txt`, сборка выполняется из корня template repository;
+- если root `backend/CMakeLists.txt` отсутствует, скрипт выбирает сервисную директорию с `CMakeLists.txt`, приоритетно `backend/auth_service`.
+
+Для текущего template repository эквивалентная ручная проверка:
 
 ```bash
-cmake -B build -S backend
+cd backend/auth_service
+cmake -B build -S .
 cmake --build build -j$(nproc)
 ```
 
