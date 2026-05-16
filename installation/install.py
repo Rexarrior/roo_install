@@ -202,11 +202,28 @@ def install_base_packages() -> None:
                 "python3",
                 "python3-pip",
                 "python3-venv",
-                "ruff",
+                "snapd",
                 "unzip",
                 "wget",
             ]
         )
+
+
+def install_ruff_via_snap() -> None:
+    if not shutil.which("snap"):
+        print("snap command is not available; installing snapd...")
+        apt_install(["snapd"])
+        require_command("snap")
+
+    if shutil.which("ruff"):
+        print("Ruff is already available")
+        run_command(["ruff", "--version"])
+        return
+
+    print("Installing Ruff via snap...")
+    run_command(sudo_prefix() + ["snap", "install", "ruff"])
+    require_command("ruff")
+    run_command(["ruff", "--version"])
 
 
 def is_userver_deb_installed() -> bool:
@@ -298,6 +315,26 @@ def docker_daemon_command() -> list[str]:
         "Docker daemon is not accessible. Add the user to the docker group and re-login, "
         "or make sure passwordless sudo can run docker."
     )
+
+
+def systemd_unit_exists(unit_name: str) -> bool:
+    result = subprocess.run(
+        ["systemctl", "list-unit-files", unit_name],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    return result.returncode == 0 and unit_name in result.stdout
+
+
+def disable_system_nginx_if_present() -> None:
+    if not systemd_unit_exists("nginx.service"):
+        print("System nginx service was not found; nothing to disable")
+        return
+
+    print("System nginx service found; stopping and disabling it to free HTTP ports...")
+    run_command(sudo_prefix() + ["systemctl", "stop", "nginx"])
+    run_command(sudo_prefix() + ["systemctl", "disable", "nginx"])
 
 
 def ensure_postgresql_running() -> None:
@@ -519,9 +556,11 @@ def main() -> int:
 
         if not args.skip_dependencies:
             install_base_packages()
+            install_ruff_via_snap()
             install_userver_deb()
             install_nodejs_latest()
             install_docker()
+            disable_system_nginx_if_present()
             ensure_postgresql_running()
             validate_compilers()
         else:

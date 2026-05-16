@@ -117,10 +117,12 @@ src code install
 - CMake, Make, Ninja, pkg-config;
 - OpenSSL, Boost, jemalloc и другие dev-библиотеки, нужные для userver;
 - prebuilt userver development package `ubuntu24.04-libuserver-all-dev_3.0_amd64.deb` из GitHub Releases;
-- Python 3, venv/pip и Ruff;
+- Python 3, venv/pip;
+- Snap/Snapd и Ruff через `sudo snap install ruff`;
 - Git, curl, wget, unzip;
 - PostgreSQL server и contrib;
 - Docker Engine, Docker Compose plugin, Buildx из официального Docker repository;
+- проверка системного `nginx.service`: если он установлен, скрипт выполняет `sudo systemctl stop nginx` и `sudo systemctl disable nginx`, чтобы освободить HTTP-порты для Docker Compose;
 - Node.js последней доступной версии из NodeSource `setup_current.x`.
 
 Во время `apt`-установки скрипт временно запрещает автозапуск сервисов через `policy-rc.d`, чтобы post-install scripts не стартовали системные сервисы на занятых портах. После базовых пакетов скрипт проверяет наличие пакета `libuserver-all-dev`; если пакет уже установлен, повторно `.deb` не скачивается. Если пакета нет, скачивается и устанавливается userver `.deb`:
