@@ -88,7 +88,21 @@ https://storage.yandexcloud.net/yandex-code-assistant/plugins/vscode/yandex-code
 code --install-extension yandex-code-assist.vsix --force
 ```
 
-3. Устанавливает CLI:
+3. Устанавливает рекомендованные VS Code extensions для C++/userver разработки:
+
+```text
+llvm-vs-code-extensions.vscode-clangd
+ms-vscode.cpptools
+ms-vscode.cmake-tools
+ms-vscode.makefile-tools
+vadimcn.vscode-lldb
+ms-azuretools.vscode-docker
+xaver.clang-format
+```
+
+В список включены расширения из `service_template/.devcontainer/devcontainer.json` userver framework, а также C++ и clang-format extensions.
+
+4. Устанавливает CLI:
 
 ```bash
 curl -fsSL https://s3.yandexcloud.net/sourcecraft-cli/install.sh | sh

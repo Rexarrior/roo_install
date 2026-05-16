@@ -37,6 +37,15 @@ TEMPLATE_REPO_URL = "https://github.com/Malevrovich/cpprussia2026_template.git"
 TEMPLATE_REPO_DIR_NAME = repo_name_from_url(TEMPLATE_REPO_URL)
 USERVER_REPO_URL = "https://github.com/userver-framework/userver.git"
 USERVER_REPO_DIR_NAME = repo_name_from_url(USERVER_REPO_URL)
+VSCODE_EXTENSION_IDS = [
+    "llvm-vs-code-extensions.vscode-clangd",
+    "ms-vscode.cpptools",
+    "ms-vscode.cmake-tools",
+    "ms-vscode.makefile-tools",
+    "vadimcn.vscode-lldb",
+    "ms-azuretools.vscode-docker",
+    "xaver.clang-format",
+]
 UBUNTU_VERSION = "24.04"
 
 
@@ -302,6 +311,13 @@ def find_sourcecraft_binary() -> str:
     )
 
 
+def install_vscode_extensions() -> None:
+    print("Installing recommended VS Code extensions for C++/userver development...")
+    install_vscode_if_missing()
+    for extension_id in VSCODE_EXTENSION_IDS:
+        run_command(["code", "--install-extension", extension_id, "--force"])
+
+
 def install_sourcecraft() -> None:
     print("Installing SourceCraft Code Assistant VS Code extension and CLI...")
     install_vscode_if_missing()
@@ -310,6 +326,7 @@ def install_sourcecraft() -> None:
         run_command(["wget", SOURCECRAFT_VSIX_URL, "-O", str(vsix_path)])
         run_command(["code", "--install-extension", str(vsix_path), "--force"])
 
+    install_vscode_extensions()
     run_shell(f"curl -fsSL {SOURCECRAFT_CLI_INSTALL_URL} | sh")
     src_binary = find_sourcecraft_binary()
     run_command([src_binary, "code", "install"])
