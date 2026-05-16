@@ -120,11 +120,10 @@ src code install
 - Python 3, venv/pip;
 - Git, curl, wget, unzip;
 - PostgreSQL server и contrib;
-- Nginx для локального reverse proxy/static serving;
 - Docker Engine, Docker Compose plugin, Buildx из официального Docker repository;
 - Node.js последней доступной версии из NodeSource `setup_current.x`.
 
-Во время `apt`-установки скрипт временно запрещает автозапуск сервисов через `policy-rc.d`, чтобы установка `nginx` не падала на машинах, где порты `80`/`443` уже заняты. После базовых пакетов скрипт проверяет наличие пакета `libuserver-all-dev`; если пакет уже установлен, повторно `.deb` не скачивается. Если пакета нет, скачивается и устанавливается userver `.deb`:
+Во время `apt`-установки скрипт временно запрещает автозапуск сервисов через `policy-rc.d`, чтобы post-install scripts не стартовали системные сервисы на занятых портах. После базовых пакетов скрипт проверяет наличие пакета `libuserver-all-dev`; если пакет уже установлен, повторно `.deb` не скачивается. Если пакета нет, скачивается и устанавливается userver `.deb`:
 
 ```text
 https://github.com/userver-framework/userver/releases/download/v3.0/ubuntu24.04-libuserver-all-dev_3.0_amd64.deb

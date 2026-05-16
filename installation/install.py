@@ -112,11 +112,10 @@ def apt_install(packages: list[str]) -> None:
 def prevent_service_autostart_during_apt():
     """Prevent package post-install scripts from auto-starting daemons.
 
-    Some workshop hosts already have ports 80/443 occupied by existing services.
-    Installing nginx must still succeed in that case, so we temporarily add the
-    standard Debian/Ubuntu policy hook that tells invoke-rc.d not to start
-    services automatically. Services required by this installer are started
-    explicitly later.
+    Some workshop hosts already have ports occupied by existing services. We
+    temporarily add the standard Debian/Ubuntu policy hook that tells
+    invoke-rc.d not to start services automatically. Services required by this
+    installer are started explicitly later.
     """
     policy_path = Path("/usr/sbin/policy-rc.d")
     created_policy = False
@@ -196,7 +195,6 @@ def install_base_packages() -> None:
                 "libzstd-dev",
                 "lsb-release",
                 "make",
-                "nginx",
                 "ninja-build",
                 "pkg-config",
                 "postgresql",
