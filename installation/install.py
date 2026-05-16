@@ -210,7 +210,21 @@ def install_base_packages() -> None:
         )
 
 
+def is_userver_deb_installed() -> bool:
+    result = subprocess.run(
+        ["dpkg-query", "-W", "-f=${Status}", "libuserver-all-dev"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    return result.returncode == 0 and result.stdout.strip() == "install ok installed"
+
+
 def install_userver_deb() -> None:
+    if is_userver_deb_installed():
+        print("Prebuilt userver development package is already installed")
+        return
+
     print("Installing prebuilt userver development package for Ubuntu 24.04...")
     with tempfile.TemporaryDirectory() as tmp_dir:
         deb_path = Path(tmp_dir) / "ubuntu24.04-libuserver-all-dev_3.0_amd64.deb"
@@ -381,20 +395,6 @@ def install_sourcecraft() -> None:
     run_command([src_binary, "code", "install"])
 
 
-def copy_rules(config_folder: Path, target_folder: Path) -> None:
-    print(f"Copying agent rules from {config_folder} to {target_folder}...")
-    if not config_folder.exists():
-        raise InstallerError(f"Rules folder does not exist: {config_folder}")
-    target_folder.mkdir(parents=True, exist_ok=True)
-
-    for item in config_folder.iterdir():
-        destination = target_folder / item.name
-        if item.is_dir():
-            shutil.copytree(item, destination, dirs_exist_ok=True)
-        else:
-            shutil.copy2(item, destination)
-
-
 def clone_repository(repo_url: str, repo_dir: Path, *, update_existing: bool, display_name: str) -> None:
     if repo_dir.exists():
         if update_existing:
@@ -463,27 +463,12 @@ def verify_docker_compose_build(repo_dir: Path) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    script_dir = Path(__file__).resolve().parent
-    default_rules_folder = script_dir.parent / "service"
     default_home_folder = Path.home()
-    default_target_folder = default_home_folder / "cpprussia2026_workspace"
     default_template_repo_dir = default_home_folder / TEMPLATE_REPO_DIR_NAME
     default_userver_repo_dir = default_home_folder / USERVER_REPO_DIR_NAME
 
     parser = argparse.ArgumentParser(
-        description="Install Ubuntu 24.04 dependencies, SourceCraft tools, rules, and C++ Russia template"
-    )
-    parser.add_argument(
-        "--target-folder",
-        "--target_folder",
-        default=str(default_target_folder),
-        help="Workspace folder where agent rules will be copied",
-    )
-    parser.add_argument(
-        "--config-folder",
-        "--config_folder",
-        default=str(default_rules_folder),
-        help="Folder with AGENTS.md, rules, and skills to copy into the target workspace",
+        description="Install Ubuntu 24.04 dependencies, SourceCraft tools, and C++ Russia template"
     )
     parser.add_argument(
         "--repo-dir",
@@ -526,16 +511,12 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    target_folder = Path(args.target_folder).expanduser().resolve()
-    config_folder = Path(args.config_folder).expanduser().resolve()
     repo_dir = Path(args.repo_dir).expanduser().resolve()
     userver_repo_dir = Path(args.userver_repo_dir).expanduser().resolve()
 
     try:
         ensure_ubuntu_24()
         install_vscode_if_missing()
-
-        copy_rules(config_folder, target_folder)
 
         if not args.skip_dependencies:
             install_base_packages()
@@ -570,7 +551,6 @@ def main() -> int:
         return 1
 
     print("\nInstallation completed successfully")
-    print(f"Rules workspace: {target_folder}")
     print(f"Template repository: {repo_dir}")
     print(f"userver repository: {userver_repo_dir}")
     print("Installed agent: SourceCraft Code Assistant")

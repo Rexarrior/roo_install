@@ -5,7 +5,6 @@
 - в начале установки ставит VS Code, если команда `code` ещё недоступна;
 - ставит SourceCraft Code Assistant вместо Roo Code;
 - ставит CLI SourceCraft;
-- копирует правила, `AGENTS.md` и skills в рабочую директорию;
 - ставит системные зависимости для frontend/backend разработки;
 - ставит последнюю Node.js из NodeSource;
 - ставит Docker Engine, Docker Compose plugin и локальный PostgreSQL;
@@ -27,11 +26,10 @@
 Из директории `roo_install/installation`:
 
 ```bash
-python3 install.py \
-  --target-folder /home/$USER/cpprussia2026_workspace
+python3 install.py
 ```
 
-По умолчанию скрипт копирует правила из `../service`, а репозитории клонирует напрямую в домашнюю директорию:
+По умолчанию скрипт клонирует репозитории напрямую в домашнюю директорию:
 
 ```text
 /home/$USER/roo_install
@@ -51,8 +49,6 @@ python3 install.py
 
 ```bash
 python3 install.py \
-  --target-folder /home/$USER/cpprussia2026_workspace \
-  --config-folder ../service \
   --repo-dir /home/$USER/cpprussia2026_backend_template \
   --userver-repo-dir /home/$USER/userver
 ```
@@ -61,8 +57,6 @@ python3 install.py \
 
 | Параметр | Назначение |
 |---|---|
-| `--target-folder` / `--target_folder` | Рабочая директория, куда копируются `AGENTS.md`, `rules/` и `skills/`. |
-| `--config-folder` / `--config_folder` | Источник правил для агента. По умолчанию `../service`. |
 | `--repo-dir` | Путь, куда клонируется template repository. По умолчанию `/home/$USER/<имя из TEMPLATE_REPO_URL>`, сейчас `/home/$USER/cpprussia2026_backend_template`. |
 | `--userver-repo-dir` | Путь, куда клонируется `userver`. По умолчанию `/home/$USER/userver`. |
 | `--update-existing-repo` | Если репозиторий уже существует, выполнить `git pull --ff-only`. Без этого существующий checkout не меняется. |
@@ -130,7 +124,7 @@ src code install
 - Docker Engine, Docker Compose plugin, Buildx из официального Docker repository;
 - Node.js последней доступной версии из NodeSource `setup_current.x`.
 
-Во время `apt`-установки скрипт временно запрещает автозапуск сервисов через `policy-rc.d`, чтобы установка `nginx` не падала на машинах, где порты `80`/`443` уже заняты. После базовых пакетов скачивается и устанавливается userver `.deb`:
+Во время `apt`-установки скрипт временно запрещает автозапуск сервисов через `policy-rc.d`, чтобы установка `nginx` не падала на машинах, где порты `80`/`443` уже заняты. После базовых пакетов скрипт проверяет наличие пакета `libuserver-all-dev`; если пакет уже установлен, повторно `.deb` не скачивается. Если пакета нет, скачивается и устанавливается userver `.deb`:
 
 ```text
 https://github.com/userver-framework/userver/releases/download/v3.0/ubuntu24.04-libuserver-all-dev_3.0_amd64.deb
@@ -189,21 +183,19 @@ docker compose build
 Они могут оставаться в дереве как архивные/устаревшие файлы, но новый `install.py` их не читает.
 
 ## Частые сценарии
-
-### Только скопировать правила и проверить уже установленное окружение
+### Проверить уже установленное окружение без переустановки зависимостей и SourceCraft
 
 ```bash
 python3 install.py \
-  --target-folder /home/$USER/cpprussia2026_workspace \
   --skip-dependencies \
   --skip-sourcecraft
 ```
+
 
 ### Обновить существующий checkout шаблона
 
 ```bash
 python3 install.py \
-  --target-folder /home/$USER/cpprussia2026_workspace \
   --update-existing-repo
 ```
 
@@ -211,7 +203,6 @@ python3 install.py \
 
 ```bash
 python3 install.py \
-  --target-folder /home/$USER/cpprussia2026_workspace \
   --skip-build-checks
 ```
 
