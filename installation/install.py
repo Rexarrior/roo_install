@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -318,6 +319,12 @@ def validate_compilers() -> None:
     require_min_version("clang", (16, 0, 0))
 
 
+def download_file(url: str, destination: Path) -> None:
+    print(f"Downloading {url} to {destination}...")
+    with urllib.request.urlopen(url) as response, destination.open("wb") as output:
+        shutil.copyfileobj(response, output)
+
+
 def install_vscode_if_missing() -> None:
     if shutil.which("code"):
         print("VS Code CLI is already available")
@@ -326,7 +333,8 @@ def install_vscode_if_missing() -> None:
     print("Installing VS Code because the `code` CLI was not found...")
     with tempfile.TemporaryDirectory() as tmp_dir:
         deb_path = Path(tmp_dir) / "vscode.deb"
-        run_command(["wget", "https://go.microsoft.com/fwlink/?LinkID=760868", "-O", str(deb_path)])
+        download_file("https://go.microsoft.com/fwlink/?LinkID=760868", deb_path)
+        run_command(sudo_prefix() + ["apt-get", "update"])
         run_command(sudo_prefix() + ["apt-get", "install", "-y", str(deb_path)])
     require_command("code")
 
@@ -535,6 +543,7 @@ def main() -> int:
 
     try:
         ensure_ubuntu_24()
+        install_vscode_if_missing()
 
         copy_rules(config_folder, target_folder)
 
