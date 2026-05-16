@@ -228,6 +228,22 @@ def install_nodejs_latest() -> None:
     print(run_command(["npm", "--version"], capture_output=True))
 
 
+def current_login_user() -> str | None:
+    return os.environ.get("SUDO_USER") or os.environ.get("USER") or os.environ.get("LOGNAME")
+
+
+def enable_docker_without_sudo() -> None:
+    user = current_login_user()
+    if not user or user == "root":
+        print("Skipping docker group setup: non-root login user was not detected")
+        return
+
+    print(f"Adding {user} to the docker group for future Docker access without sudo...")
+    run_command(sudo_prefix() + ["groupadd", "-f", "docker"])
+    run_command(sudo_prefix() + ["usermod", "-aG", "docker", user])
+    print("Docker group membership will apply after the user logs out and logs back in")
+
+
 def install_docker() -> None:
     print("Installing Docker Engine and Docker Compose plugin from the official Docker repository...")
     run_command(sudo_prefix() + ["install", "-m", "0755", "-d", "/etc/apt/keyrings"])
@@ -247,8 +263,10 @@ def install_docker() -> None:
     run_command(sudo_prefix() + ["apt-get", "update"])
     apt_install(["docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"])
     require_command("docker")
-    run_command(["docker", "--version"])
-    run_command(["docker", "compose", "version"])
+    enable_docker_without_sudo()
+    docker_command = docker_daemon_command()
+    run_command(docker_command + ["--version"])
+    run_command(docker_command + ["compose", "version"])
 
 
 def docker_daemon_command() -> list[str]:
