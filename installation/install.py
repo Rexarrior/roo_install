@@ -390,6 +390,28 @@ def verify_backend(repo_dir: Path) -> None:
     run_command(["cmake", "--build", "build", f"-j{jobs}"], cwd=backend_build_dir)
 
 
+def build_backend_release_binaries_for_docker(repo_dir: Path) -> None:
+    backend_dir = repo_dir / "backend"
+    service_dirs = sorted(path for path in backend_dir.glob("*_service") if (path / "Makefile").exists())
+    if not service_dirs:
+        print("No backend service Makefiles found; skipping release binary preparation for Docker Compose")
+        return
+
+    print("Preparing backend release binaries for Docker Compose...")
+    for service_dir in service_dirs:
+        run_command(["make", "build-release"], cwd=service_dir)
+
+
+def verify_docker_compose_build(repo_dir: Path) -> None:
+    compose_file = repo_dir / "docker-compose.yml"
+    if not compose_file.exists():
+        raise InstallerError(f"Docker Compose file was not found: {compose_file}")
+
+    build_backend_release_binaries_for_docker(repo_dir)
+    print("Verifying Docker Compose build...")
+    run_command(["docker", "compose", "build"], cwd=repo_dir)
+
+
 def parse_args() -> argparse.Namespace:
     script_dir = Path(__file__).resolve().parent
     default_rules_folder = script_dir.parent / "service"
@@ -488,8 +510,9 @@ def main() -> int:
         if not args.skip_build_checks:
             verify_frontend(repo_dir)
             verify_backend(repo_dir)
+            verify_docker_compose_build(repo_dir)
         else:
-            print("Skipping frontend/backend build verification by request")
+            print("Skipping frontend/backend/Docker Compose build verification by request")
 
     except InstallerError as exc:
         print(f"\nERROR: {exc}", file=sys.stderr)

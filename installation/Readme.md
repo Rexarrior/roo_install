@@ -150,6 +150,14 @@ cmake --build build -j$(nproc)
 
 Backend сборка использует `backend/auth_service/CMakeLists.txt`. Если userver не найден локально, логика проекта скачает его через CMake/CPM.
 
+### Docker Compose
+
+После frontend/backend проверки скрипт подготавливает release-бинарники сервисов для Dockerfile и запускает из корня template repository:
+
+```bash
+docker compose build
+```
+
 ## Что больше не используется
 
 Старая логика Roo Code удалена из скрипта:
