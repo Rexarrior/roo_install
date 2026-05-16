@@ -117,7 +117,7 @@ src code install
 - CMake, Make, Ninja, pkg-config;
 - OpenSSL, Boost, jemalloc и другие dev-библиотеки, нужные для userver;
 - prebuilt userver development package `ubuntu24.04-libuserver-all-dev_3.0_amd64.deb` из GitHub Releases;
-- Python 3, venv/pip;
+- Python 3, venv/pip и Ruff;
 - Git, curl, wget, unzip;
 - PostgreSQL server и contrib;
 - Docker Engine, Docker Compose plugin, Buildx из официального Docker repository;

@@ -202,6 +202,7 @@ def install_base_packages() -> None:
                 "python3",
                 "python3-pip",
                 "python3-venv",
+                "ruff",
                 "unzip",
                 "wget",
             ]
