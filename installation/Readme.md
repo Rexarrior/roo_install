@@ -146,11 +146,9 @@ Template repository задаётся одной переменной `TEMPLATE_R
 
 ```bash
 cd frontend
-npm ci
+npm install
 npm run build
 ```
-
-Если `package-lock.json` отсутствует, вместо `npm ci` будет использовано `npm install`.
 
 ### Backend
 
@@ -163,15 +161,14 @@ npm run build
 
 ```bash
 cd backend/example_service
-cmake -B build -S .
-cmake --build build -j$(nproc)
+make build-release
 ```
 
 Backend сборка использует `backend/example_service/CMakeLists.txt`. Если userver не найден локально, логика проекта скачает его через CMake/CPM.
 
 ### Docker Compose
 
-После frontend/backend проверки скрипт подготавливает release-бинарники сервисов для Dockerfile и запускает из корня template repository:
+После frontend/backend проверки скрипт запускает из корня template repository:
 
 ```bash
 docker compose build

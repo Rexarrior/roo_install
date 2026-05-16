@@ -361,6 +361,12 @@ def install_vscode_extensions() -> None:
         run_command(["code", "--install-extension", extension_id, "--force"])
 
 
+# README build flow:
+# 1. cd frontend && npm install && npm run build
+# 2. cd backend/example_service && make build-release
+# 3. sudo docker compose build
+
+
 def install_sourcecraft() -> None:
     print("Installing SourceCraft Code Assistant VS Code extension and CLI...")
     install_vscode_if_missing()
@@ -416,9 +422,7 @@ def verify_frontend(repo_dir: Path) -> None:
         raise InstallerError(f"Frontend directory was not found: {frontend_dir}")
 
     print("Verifying frontend build...")
-    package_lock = frontend_dir / "package-lock.json"
-    install_command = ["npm", "ci"] if package_lock.exists() else ["npm", "install"]
-    run_command(install_command, cwd=frontend_dir)
+    run_command(["npm", "install"], cwd=frontend_dir)
     run_command(["npm", "run", "build"], cwd=frontend_dir)
 
 
@@ -441,25 +445,12 @@ def find_backend_build_dir(repo_dir: Path) -> Path:
     raise InstallerError(f"No backend CMakeLists.txt was found under: {backend_dir}")
 
 
-def verify_backend(repo_dir: Path) -> None:
+def verify_backend(repo_dir: Path) -> Path:
     backend_build_dir = find_backend_build_dir(repo_dir)
 
     print(f"Verifying backend build in {backend_build_dir}...")
-    run_command(["cmake", "-B", "build", "-S", "."], cwd=backend_build_dir)
-    jobs = str(os.cpu_count() or 2)
-    run_command(["cmake", "--build", "build", f"-j{jobs}"], cwd=backend_build_dir)
-
-
-def build_backend_release_binaries_for_docker(repo_dir: Path) -> None:
-    backend_dir = repo_dir / "backend"
-    service_dirs = sorted(path for path in backend_dir.glob("*_service") if (path / "Makefile").exists())
-    if not service_dirs:
-        print("No backend service Makefiles found; skipping release binary preparation for Docker Compose")
-        return
-
-    print("Preparing backend release binaries for Docker Compose...")
-    for service_dir in service_dirs:
-        run_command(["make", "build-release"], cwd=service_dir)
+    run_command(["make", "build-release"], cwd=backend_build_dir)
+    return backend_build_dir
 
 
 def verify_docker_compose_build(repo_dir: Path) -> None:
@@ -467,7 +458,6 @@ def verify_docker_compose_build(repo_dir: Path) -> None:
     if not compose_file.exists():
         raise InstallerError(f"Docker Compose file was not found: {compose_file}")
 
-    build_backend_release_binaries_for_docker(repo_dir)
     print("Verifying Docker Compose build...")
     run_command(docker_daemon_command() + ["compose", "build"], cwd=repo_dir)
 
