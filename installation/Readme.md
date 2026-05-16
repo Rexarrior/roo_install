@@ -172,6 +172,8 @@ Backend сборка использует `backend/example_service/CMakeLists.tx
 docker compose build
 ```
 
+Если текущий пользователь не имеет прямого доступа к Docker daemon, скрипт автоматически попробует выполнить сборку через `sudo docker compose build`.
+
 ## Что больше не используется
 
 Старая логика Roo Code удалена из скрипта:

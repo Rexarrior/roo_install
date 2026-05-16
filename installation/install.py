@@ -251,6 +251,23 @@ def install_docker() -> None:
     run_command(["docker", "compose", "version"])
 
 
+def docker_daemon_command() -> list[str]:
+    if subprocess.run(["docker", "info"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+        return ["docker"]
+
+    sudo_command = sudo_prefix() + ["docker"]
+    if sudo_command != ["docker"]:
+        if subprocess.run(
+            sudo_command + ["info"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        ).returncode == 0:
+            return sudo_command
+
+    raise InstallerError(
+        "Docker daemon is not accessible. Add the user to the docker group and re-login, "
+        "or make sure passwordless sudo can run docker."
+    )
+
+
 def ensure_postgresql_running() -> None:
     print("Enabling local PostgreSQL service...")
     run_command(sudo_prefix() + ["systemctl", "enable", "--now", "postgresql"])
@@ -426,7 +443,7 @@ def verify_docker_compose_build(repo_dir: Path) -> None:
 
     build_backend_release_binaries_for_docker(repo_dir)
     print("Verifying Docker Compose build...")
-    run_command(["docker", "compose", "build"], cwd=repo_dir)
+    run_command(docker_daemon_command() + ["compose", "build"], cwd=repo_dir)
 
 
 def parse_args() -> argparse.Namespace:
