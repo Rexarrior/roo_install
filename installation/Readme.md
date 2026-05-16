@@ -34,7 +34,7 @@ python3 install.py \
 
 ```text
 /home/$USER/roo_install
-/home/$USER/cpprussia2026_template
+/home/$USER/cpprussia2026_backend_template
 /home/$USER/userver
 ```
 
@@ -52,7 +52,7 @@ python3 install.py
 python3 install.py \
   --target-folder /home/$USER/cpprussia2026_workspace \
   --config-folder ../service \
-  --repo-dir /home/$USER/cpprussia2026_template \
+  --repo-dir /home/$USER/cpprussia2026_backend_template \
   --userver-repo-dir /home/$USER/userver
 ```
 
@@ -62,7 +62,7 @@ python3 install.py \
 |---|---|
 | `--target-folder` / `--target_folder` | Рабочая директория, куда копируются `AGENTS.md`, `rules/` и `skills/`. |
 | `--config-folder` / `--config_folder` | Источник правил для агента. По умолчанию `../service`. |
-| `--repo-dir` | Путь, куда клонируется template repository. По умолчанию `/home/$USER/<имя из TEMPLATE_REPO_URL>`, сейчас `/home/$USER/cpprussia2026_template`. |
+| `--repo-dir` | Путь, куда клонируется template repository. По умолчанию `/home/$USER/<имя из TEMPLATE_REPO_URL>`, сейчас `/home/$USER/cpprussia2026_backend_template`. |
 | `--userver-repo-dir` | Путь, куда клонируется `userver`. По умолчанию `/home/$USER/userver`. |
 | `--update-existing-repo` | Если репозиторий уже существует, выполнить `git pull --ff-only`. Без этого существующий checkout не меняется. |
 | `--skip-sourcecraft` | Пропустить установку расширения и CLI SourceCraft. |
@@ -135,7 +135,7 @@ https://github.com/userver-framework/userver/releases/download/v3.0/ubuntu24.04-
 
 ## Проверка репозитория
 
-Template repository задаётся одной переменной `TEMPLATE_REPO_URL` в `install.py`; имя директории по умолчанию вычисляется из этой переменной, без отдельного хардкода. После клонирования `cpprussia2026_template` скрипт выполняет:
+Template repository задаётся одной переменной `TEMPLATE_REPO_URL` в `install.py`; имя директории по умолчанию вычисляется из этой переменной, без отдельного хардкода. Сейчас используется `https://github.com/Malevrovich/cpprussia2026_backend_template.git`, поэтому после клонирования `cpprussia2026_backend_template` скрипт выполняет:
 
 ### Frontend
 
@@ -152,17 +152,17 @@ npm run build
 Скрипт поддерживает две раскладки backend:
 
 - если есть `backend/CMakeLists.txt`, сборка выполняется из корня template repository;
-- если root `backend/CMakeLists.txt` отсутствует, скрипт выбирает сервисную директорию с `CMakeLists.txt`, приоритетно `backend/auth_service`.
+- если root `backend/CMakeLists.txt` отсутствует, скрипт выбирает сервисную директорию с `CMakeLists.txt`, приоритетно `backend/auth_service`, иначе первую доступную `backend/*_service` директорию.
 
-Для текущего template repository эквивалентная ручная проверка:
+Для текущего `cpprussia2026_backend_template` эквивалентная ручная проверка:
 
 ```bash
-cd backend/auth_service
+cd backend/example_service
 cmake -B build -S .
 cmake --build build -j$(nproc)
 ```
 
-Backend сборка использует `backend/auth_service/CMakeLists.txt`. Если userver не найден локально, логика проекта скачает его через CMake/CPM.
+Backend сборка использует `backend/example_service/CMakeLists.txt`. Если userver не найден локально, логика проекта скачает его через CMake/CPM.
 
 ### Docker Compose
 

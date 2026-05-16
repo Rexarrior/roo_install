@@ -33,7 +33,7 @@ USERVER_DEB_URL = (
     "https://github.com/userver-framework/userver/releases/download/v3.0/"
     "ubuntu24.04-libuserver-all-dev_3.0_amd64.deb"
 )
-TEMPLATE_REPO_URL = "https://github.com/Malevrovich/cpprussia2026_template.git"
+TEMPLATE_REPO_URL = "https://github.com/Malevrovich/cpprussia2026_backend_template.git"
 TEMPLATE_REPO_DIR_NAME = repo_name_from_url(TEMPLATE_REPO_URL)
 USERVER_REPO_URL = "https://github.com/userver-framework/userver.git"
 USERVER_REPO_DIR_NAME = repo_name_from_url(USERVER_REPO_URL)
